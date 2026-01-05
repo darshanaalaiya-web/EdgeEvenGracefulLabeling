@@ -1,0 +1,61 @@
+clc; clear;
+nrows = input("Enter number of vertices: ");
+rmod = rem(nrows,6);
+makeBand = @(n, a, b) diag(a(1:n-1),1) + diag(b(1:n-1),-1);
+switch rmod
+case {0,2,4}
+        X = makeBand(nrows, 2*(1:nrows), 2*(1:nrows));
+        Y = makeBand(nrows, 8*nrows - 4*(1:nrows) + 2, 8*nrows - 4*(1:nrows) + 4);
+        B = makeBand(nrows, 2*nrows + 2*(1:nrows), 2*nrows + 2*(1:nrows));
+
+        X(1,nrows) = 2*nrows; X(nrows,1) = 2*nrows;
+        Y(1,nrows) = 4*nrows+2; Y(nrows,1) = 4*nrows;
+        B(1,nrows) = 4*nrows+4; B(nrows,1) = 4*nrows+4;
+        A = Y.';
+case {1,5}
+        X = zeros(nrows);
+        for r=1:nrows-1 
+            if rem(r,2)==0
+                X(r,r+1)=4*nrows+r+2;  X(r+1,r)=4*nrows+r+2;
+            else
+                X(r,r+1)=5*nrows+r+2;  X(r+1,r)=5*nrows+r+2;
+            end
+        end
+        X(1,nrows)=4*nrows+2; X(nrows,1)=4*nrows+2;
+        Y = makeBand(nrows,2*nrows + 2*(1:nrows),2*(1:nrows)+2);
+        Y(1,nrows)=2; Y(nrows,1)=4*nrows;
+        A = Y.';
+        B = zeros(nrows);
+         for r=1:nrows-1 
+            if rem(r,2)==0
+                B(r,r+1)=6*nrows+r+2; B(r+1,r)=6*nrows+r+2;
+            else
+                B(r,r+1)=7*nrows+r+2; B(r+1,r)=7*nrows+r+2;
+            end
+        end
+        B(1,nrows)=6*nrows+2; B(nrows,1)=6*nrows+2;
+case 3  
+        X = makeBand(nrows, 2*(1:nrows), 2*(1:nrows));
+        Y = makeBand(nrows, 8*nrows - 4*(1:nrows) + 2, 8*nrows - 4*(1:nrows) + 4);
+        B = makeBand(nrows, 2*nrows + 2*(1:nrows), 2*nrows + 2*(1:nrows));
+        X(1,nrows)=2*nrows; X(nrows,1)=2*nrows;
+        Y(1,nrows)=4*nrows+4; Y(nrows,1)=4*nrows+2;
+        B(1,nrows)=4*nrows; B(nrows,1)=4*nrows;
+        A = Y.';
+end
+K = [X, Y; A, B];
+disp(K);
+G = graph(K);
+b = mod(sum(adjacency(G,"weighted"),2), 8*nrows);
+h = plot(G,'Layout','force');
+camroll(90);
+h.EdgeLabel = G.Edges.Weight;
+h.NodeLabel = b;
+h.EdgeFontSize = 8;
+disp(G.Edges)
+disp(b)
+if numel(b)==numel(unique(b))
+    disp("No repeated values.");
+else
+    disp("Repeated values found.");
+end
