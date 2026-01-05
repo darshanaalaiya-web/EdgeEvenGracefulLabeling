@@ -1,0 +1,75 @@
+clc; clear;
+n = input("Enter number of vertices: ");
+makeBand = @(n,u,l) diag(u(1:n-1),1) + diag(l(1:n-1),-1);
+if rem(n,4)==0
+    Xu = zeros(1,n); Xl = zeros(1,n);  
+    Xu(2:2:n) = 3*n - 3*(1:2:n)+3 ;        
+    Xu(1:2:n) =3*n + 3*(2:2:n) - 2 ;          
+    Xl(2:2:n) = 3*n - 3*(1:2:n) +3;
+    Xl(1:2:n) =3*n + 3*(2:2:n) - 2; 
+    X = makeBand(n, Xu, Xl);
+    X(n-1,n) = 6*n - 4;
+    X(n,n-1) = 6*n - 4;
+    X(1,n)   = 6;
+    X(n,1)   = 6;
+    Yu = zeros(1,n); Yl = zeros(1,n);
+    Yu(1:2:n) = 3*n + 3*(1:2:n) - 1;
+    Yu(2:2:n) = 3*(2:2:n)+2;
+    Yl(1:2:n) = 3*(1:2:n)+1;
+    Yl(2:2:n) = 3*n + 3*(2:2:n);
+    Y = makeBand(n, Yu, Yl);
+    Y(n-1,n) = 6*n - 2;
+    Y(1,n)   = 6*n;
+    Y(n,1)   = 2;
+    A = Y'; 
+    B = zeros(n);
+elseif rem(n,4)==1 || rem(n,4)==3
+    Xu = 6*(1:n) - 4;     
+    Xl = Xu;            
+    X = makeBand(n, Xu, Xl);
+    X(1,n) = 6*n - 4;
+    X(n,1) = 6*n - 4;
+    Yu = 6*(1:n);
+    Yl = 6*(1:n) - 2;
+    Y = makeBand(n, Yu, Yl);
+    Y(1,n) = 6*n - 2;
+    Y(n,1) = 6*n;
+    A = Y';
+    B = zeros(n);
+else  
+    Xu = zeros(1,n);  Xl = zeros(1,n);
+    Xu(2:2:n) = 4*n + (2:2:n) + 2;
+    Xl(2:2:n) = 4*n + (2:2:n) + 2;
+    Xu(1:2:n) = 6*n - (1:2:n) + 1;
+    Xl(1:2:n) = Xu(1:2:n);
+    X = makeBand(n, Xu, Xl);
+    X(1,n) = 4*n + 2;
+    X(n,1) = 4*n + 2;
+    Yu = zeros(1,n); Yl = zeros(1,n);
+    Yu(1:2:n) = 2*n + (1:2:n)+1;
+    Yl(1:2:n) = n + (2:2:n);
+    Yu(2:2:n) = (1:2:n) + 3;
+    Yl(2:2:n) = 3*n + (2:2:n);
+    Y = makeBand(n, Yu, Yl);
+    Y(1,n) = 4*n;
+    Y(n,1) = 2;
+    A = Y';
+    B = zeros(n);
+end
+K = [X, Y; A, B];
+disp(K);
+G = graph(K);
+s = sum(adjacency(G,"weighted"),2);
+b = mod(s, 6*n);
+h = plot(G,'Layout','force');
+camroll(90);
+h.EdgeLabel = G.Edges.Weight;
+h.NodeLabel = b;
+h.EdgeFontSize = 8;
+disp(G.Edges);
+disp(b);
+if numel(b)==numel(unique(b))
+    disp("No repeated values.")
+else
+    disp("Repeated values found.")
+end
